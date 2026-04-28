@@ -1,0 +1,72 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Default deny
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Helper functions
+    function isSignedIn() {
+      return request.auth != null;
+    }
+    
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+    
+    function isAdmin() {
+      return isSignedIn() && 
+        exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
+    }
+
+    // User rules
+    match /users/{userId} {
+      allow read: if isSignedIn();
+      // Allow creation if it's the owner's own profile
+      allow create: if isOwner(userId);
+      allow update: if isOwner(userId) || isAdmin();
+    }
+    
+    // Explicitly allow listing users for bootstrapping check
+    match /users {
+      allow list: if isSignedIn();
+    }
+
+    // Provider rules
+    match /providers/{providerId} {
+      allow read: if true; 
+      allow update: if isSignedIn() && (isAdmin() || (resource != null && resource.data.userId == request.auth.uid));
+      allow write: if isAdmin();
+    }
+
+    // Booking rules
+    match /bookings/{bookingId} {
+      // Owner can read their own, Admin can read all
+      allow read: if isSignedIn() && (resource.data.userId == request.auth.uid || isAdmin());
+      allow create: if isSignedIn() && request.resource.data.userId == request.auth.uid;
+      allow update: if isSignedIn() && (resource.data.userId == request.auth.uid || isAdmin());
+      allow delete: if isAdmin();
+    }
+    
+    // Explicitly allow list queries for bookings if filtered by owner or if admin
+    match /bookings {
+       allow list: if isSignedIn();
+    }
+
+    // Category rules
+    match /categories/{categoryId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // Application rules
+    match /applications/{applicationId} {
+      allow create: if isSignedIn();
+      allow read: if isAdmin();
+      allow list: if isAdmin();
+      allow update, delete: if isAdmin();
+    }
+  }
+}

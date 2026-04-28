@@ -1,0 +1,101 @@
+{
+  "entities": {
+    "User": {
+      "title": "User",
+      "description": "Application user profile",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "email": { "type": "string" },
+        "role": { "type": "string", "enum": ["user", "admin"] },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["id", "name", "email", "role"]
+    },
+    "Provider": {
+      "title": "Service Provider",
+      "description": "Provider of a local service",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "specialty": { "type": "string" },
+        "rating": { "type": "number" },
+        "reviewCount": { "type": "number" },
+        "phone": { "type": "string" },
+        "bio": { "type": "string" },
+        "categoryId": { "type": "string" },
+        "imageUrl": { "type": "string" },
+        "price": { "type": "number" }
+      },
+      "required": ["id", "name", "specialty", "categoryId"]
+    },
+    "Booking": {
+      "title": "Service Booking",
+      "description": "A booking request from a user to a provider",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "userId": { "type": "string" },
+        "providerId": { "type": "string" },
+        "serviceDate": { "type": "string", "format": "date-time" },
+        "status": { "type": "string", "enum": ["pending", "completed", "cancelled"] },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" },
+        "userName": { "type": "string" },
+        "providerName": { "type": "string" },
+        "specialty": { "type": "string" }
+      },
+      "required": ["userId", "providerId", "serviceDate", "status"]
+    },
+    "Category": {
+      "title": "Service Category",
+      "description": "Category of service (e.g., Plumber, Electrician)",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "iconName": { "type": "string" }
+      },
+      "required": ["id", "name"]
+    },
+    "Application": {
+      "title": "Partner Application",
+      "description": "Application from a professional to join the platform",
+      "type": "object",
+      "properties": {
+        "name": { "type": "string" },
+        "phone": { "type": "string" },
+        "city": { "type": "string" },
+        "specialty": { "type": "string" },
+        "experience": { "type": "string" },
+        "status": { "type": "string", "enum": ["pending", "reviewed", "accepted", "rejected"] },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["name", "phone", "city", "specialty", "status"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": "User",
+      "description": "User profiles"
+    },
+    "/providers/{providerId}": {
+      "schema": "Provider",
+      "description": "Service providers"
+    },
+    "/bookings/{bookingId}": {
+      "schema": "Booking",
+      "description": "Bookings for services"
+    },
+    "/categories/{categoryId}": {
+      "schema": "Category",
+      "description": "Service categories"
+    },
+    "/applications/{applicationId}": {
+      "schema": "Application",
+      "description": "Partner applications"
+    }
+  }
+}
